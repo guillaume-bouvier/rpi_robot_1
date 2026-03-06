@@ -3,18 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raspberry Pi Video Stream</title>
+    <title>Raspberry Pi Camera Stream</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            /* overflow: hidden; */
-        }
         .control {
             position: relative;
-            width: 200px;
-            height: 200px;
+            width: 50px;
+            height: 50px;
             background-color: rgba(0, 0, 255, 0.1);
             border: 1px solid blue;
             display: flex;
@@ -30,18 +24,21 @@
         .control.active {
             background-color: rgba(0, 0, 255, 0.5);
         }
-        /* #up { top: 0; left: 50%; transform: translateX(-50%); }
-        #down { bottom: 0; left: 50%; transform: translateX(-50%); }
-        #left { top: 50%; left: 0; transform: translateY(-50%); }
-        #right { top: 50%; right: 0; transform: translateY(-50%); } */
     </style>
 </head>
 <body>
-    <h1 align="center">Raspberry Pi Video Stream</h1>
-    <!-- <video src="/cam" id="cam" autoplay playsinline></video> -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script type="text/javascript">
+        var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+        window.onbeforeunload = function() {
+            socket.close();
+        };
+    </script>
+    
+    <h1>Raspberry Pi Camera Stream</h1>
+    <iframe src="http://rpiz2-2:5000/video_feed" width="640" height="480" frameborder="0" allowfullscreen></iframe>
     <table>
         <tr>
-            <!-- <td><img src="/cam"></td> -->
             <td>
                 <table>
                     <tr>
@@ -56,34 +53,52 @@
                     </tr>
                 </table>
             </td>
+            <td>
+                <table>
+                    <tr>
+                        <td></td>
+                        <td><div id="w" class="control">w</div></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><div id="a" class="control">a</div></td>
+                        <td><div id="s" class="control">s</div></td>
+                        <td><div id="d" class="control">d</div></td>
+                    </tr>
+                </table>
+            </td>
         </tr>
         <tr>
-            <td colspan="2" align="center">
+            <td align="center">
                 <div class="key-status" id="command-status" style="font-size: 1.5em; color: blue;">Command: stop</div>
+            </td>
+            <td align="center">
+                <div class="servo-status" id="servo-status" style="font-size: 1.5em; color: blue;">Servo: stop</div>
             </td>
         </tr>
     </table>
-    
-    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
-    <script type="text/javascript">
-        var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
-        window.onbeforeunload = function() {
-            socket.close();
-        };
-    </script>
+
     <script>
         const controls = {
             up: document.getElementById('up'),
             down: document.getElementById('down'),
             left: document.getElementById('left'),
-            right: document.getElementById('right')
+            right: document.getElementById('right'),
+            w: document.getElementById('w'),
+            a: document.getElementById('a'),
+            s: document.getElementById('s'),
+            d: document.getElementById('d')
         };
 
         const keysPressed = {
             up: false,
             down: false,
             left: false,
-            right: false
+            right: false,
+            w: false,
+            a: false,
+            s: false,
+            d: false
         };
 
         const keyCombinationToCommand = [
@@ -125,7 +140,7 @@
         };
 
         const sendCommand = (command) => {
-            fetch('http://192.168.2.40:5000/command', {  // Replace YOUR_SERVER_IP with the actual IP address of the server
+            fetch('http://rpiz2-2:5000/motor', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -186,6 +201,22 @@
                     keysPressed.right = true;
                     controls.right.classList.add('active');
                     break;
+                case 'w':
+                    keysPressed.w = true;
+                    controls.w.classList.add('active');
+                    break;
+                case 'a':
+                    keysPressed.a = true;
+                    controls.a.classList.add('active');
+                    break;
+                case 's':
+                    keysPressed.s = true;
+                    controls.s.classList.add('active');
+                    break;
+                case 'd':
+                    keysPressed.d = true;
+                    controls.d.classList.add('active');
+                    break;
                 default:
                     return;
             }
@@ -209,6 +240,22 @@
                 case 'ArrowRight':
                     keysPressed.right = false;
                     controls.right.classList.remove('active');
+                    break;
+                case 'w':
+                    keysPressed.w = false;
+                    controls.w.classList.remove('active');
+                    break;
+                case 'a':
+                    keysPressed.a = false;
+                    controls.a.classList.remove('active');
+                    break;
+                case 's':
+                    keysPressed.s = false;
+                    controls.s.classList.remove('active');
+                    break;
+                case 'd':
+                    keysPressed.d = false;
+                    controls.d.classList.remove('active');
                     break;
                 default:
                     return;

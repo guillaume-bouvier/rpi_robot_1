@@ -1,0 +1,56 @@
+classDiagram
+    Engine "1" *-- "4" TTMotor : has
+    Engine "1" *-- "2" Servo : has
+    class Engine{
+        +PCA9685 pwm
+        +Map~String, TTMotor~ motors 
+        +Map~String, Servo~ servos  
+        +__init__(pwm) Engine
+        +set_motor_status(motor_status, speed)
+    }
+    class TTMotor{
+        +PCA9685 pwm
+        +int pwm_channel
+        +int in1_channel
+        +int in2_channel
+        +Map~String, Function~ fn_motor_direction
+        +__init__(pwm, pwm_channel, in1_channel, in2_channel) TTMotor
+        +set_motor_forward(speed)
+        +set_motor_backward(speed)
+        +set_motor_stop()
+    }
+    class Servo{
+        +int address
+        +List~int~ angle_map
+        +int angle
+        +int min_angle
+        +int max_angle
+        +PCA9685 pwm
+        +Bool move
+        +int step
+        +float sleep
+        +Thread thread
+        +__init__(address, pwm, start_angle=90) Servo
+        +set_angle(angle)
+        +move_towards(target_angle)
+        +stop_moving()
+        +set_servo_off()
+        -_init_angles()
+        -_move_to_angle_by_step(target_angle)
+    }
+    class Mapper{
+        +PCA9685 pwm
+        +DistanceSensor ultra_sensor
+        +Servo servo
+        +List polar_map
+        +Bool scanning
+        +__init__(pwm, trigger_pin, echo_pin) Mapper
+        +scan_environment()
+        +start_continuous_scan(step)
+        +stop_continuous_scan(step)
+        +continuous_scan(step)
+        +get_distance()
+        +get_angle()
+        +get_polar_coordinates()
+        +get_cartesian_coordinates() 
+    }

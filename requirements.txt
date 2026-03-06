@@ -4,3 +4,4 @@ numpy
 flask
 picamera2
 libcamera
+gpiozero
